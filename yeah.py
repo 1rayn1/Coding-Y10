@@ -15,7 +15,7 @@ save_file = "players.json"
 play = 0
 
 #csv is https://www.kaggle.com/datasets/vijayvvenkitesh/global-land-temperatures-by-country
-
+#
 def write(message):  # Gradually types out every line instead of typewriting it in blocks
     for char in message:
         sys.stdout.write(char)
