@@ -11,6 +11,16 @@ client = None
 chat_history = []
 nickname = None
 current_server = None  # (name, host, port)
+def receive_messages():
+    while True:
+        try:
+            msg = client.recv(1024).decode("ascii")
+            if not msg:
+                break
+            chat_history.append(msg.rstrip("\n"))
+        except Exception as e:
+            chat_history.append(f"[receiver crashed] {e}")
+            break
 
 def connect_to_server(nick, host, port):
     global client, nickname, current_server
@@ -19,18 +29,6 @@ def connect_to_server(nick, host, port):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((host, port))
     client.sendall(nickname.encode("ascii"))
-
-    def receive_messages():
-        while True:
-            try:
-                msg = client.recv(1024).decode("ascii")
-                if not msg:
-                    break
-                chat_history.append(msg.rstrip("\n"))
-            except Exception as e:
-                chat_history.append(f"[receiver crashed] {e}")
-                break
-
     threading.Thread(target=receive_messages, daemon=True).start()
 
 def fetch_servers_from_hub():
@@ -269,7 +267,9 @@ def friends_page(stdscr):
 
 def DMS(stdscr):
     curses.curs_set(1)
+    curses.echo()
     stdscr.nodelay(False)
+    
 
     height, width = stdscr.getmaxyx()
 
@@ -277,6 +277,7 @@ def DMS(stdscr):
         stdscr.clear()
         stdscr.addstr(0, 0, "== Chat == (type 'back' to return)")
         stdscr.addstr(1, 0, "Use /dm user message, /addfriend user, /friends")
+        stdscr.refresh()
 
         start = max(0, len(chat_history) - (height - 5))
         for i, line in enumerate(chat_history[start:], start=3):
@@ -325,7 +326,7 @@ def DMS(stdscr):
     home_page(stdscr)
 
 def server_page(stdscr):
-    # just re-open server menu
+
     if nickname:
         server_menu(stdscr, nickname)
     else:

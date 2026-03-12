@@ -4,7 +4,7 @@ import threading
 HOST = "127.0.0.1"
 PORT = 9100
 
-servers = {}  # name -> (host, port)
+servers = {}
 lock = threading.Lock()
 
 def handle_client(conn, addr):

@@ -8,7 +8,7 @@ HUB_PORT = 9100
 
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 9000
-SERVER_NAME = "Main"
+SERVER_NAME = "no"
 
 server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_sock.bind((SERVER_HOST, SERVER_PORT))
