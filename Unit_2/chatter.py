@@ -10,7 +10,7 @@ HUB_PORT = 9100
 client = None
 chat_history = []
 nickname = None
-current_server = None  # (name, host, port)
+current_server = None
 def receive_messages():
     while True:
         try:
