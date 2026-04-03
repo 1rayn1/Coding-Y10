@@ -268,10 +268,11 @@ def friends_page(stdscr):
 def DMS(stdscr):
     curses.curs_set(1)
     curses.echo()
-    stdscr.nodelay(False)
+    stdscr.nodelay(True)
     
 
     height, width = stdscr.getmaxyx()
+    message = ""
 
     while True:
         stdscr.clear()
@@ -285,43 +286,45 @@ def DMS(stdscr):
                 break
             stdscr.addstr(i, 0, line[:width - 1])
 
-        stdscr.addstr(height - 2, 0, "Message: ")
-        stdscr.move(height - 2, 9)
-        stdscr.clrtoeol()
-        try:
-            raw = stdscr.getstr(height - 2, 9, width - 10)
-            message = raw.decode("utf-8")
-        except Exception:
-            message = ""
-
-        if message.lower() == "back":
-            break
-
-        if message.startswith("/dm "):
-            parts = message.split(" ", 2)
-            if len(parts) == 3:
-                target, dm = parts[1], parts[2]
-                wire = f"CMD:DM:{target}:{dm}\n"
-                client.sendall(wire.encode("ascii"))
-            else:
-                chat_history.append("[client] usage: /dm user message")
-        elif message.startswith("/addfriend "):
-            parts = message.split(" ", 1)
-            target = parts[1].strip()
-            wire = f"CMD:ADD_FRIEND:{target}\n"
-            client.sendall(wire.encode("ascii"))
-        elif message.strip() == "/friends":
-            client.sendall(b"CMD:GET_FRIENDS\n")
-        else:
-            if client:
-                try:
-                    client.sendall(f"{message}\n".encode("ascii"))
-                except Exception:
-                    chat_history.append("[error] failed to send message")
-            else:
-                chat_history.append("[error] not connected to server")
-
+        stdscr.addstr(height - 2, 0, f"Message: {message}")
+        stdscr.move(height - 2, 9 + len(message))
         stdscr.refresh()
+
+        key = stdscr.getch()
+        if key == -1:
+            curses.napms(100)  # Small delay to avoid high CPU usage
+            continue
+        elif key in [10, 13]:  # Enter
+            if message.lower() == "back":
+                break
+            if message.startswith("/dm "):
+                parts = message.split(" ", 2)
+                if len(parts) == 3:
+                    target, dm = parts[1], parts[2]
+                    wire = f"CMD:DM:{target}:{dm}\n"
+                    client.sendall(wire.encode("ascii"))
+                else:
+                    chat_history.append("[client] usage: /dm user message")
+            elif message.startswith("/addfriend "):
+                parts = message.split(" ", 1)
+                target = parts[1].strip()
+                wire = f"CMD:ADD_FRIEND:{target}\n"
+                client.sendall(wire.encode("ascii"))
+            elif message.strip() == "/friends":
+                client.sendall(b"CMD:GET_FRIENDS\n")
+            else:
+                if client:
+                    try:
+                        client.sendall(f"{message}\n".encode("ascii"))
+                    except Exception:
+                        chat_history.append("[error] failed to send message")
+                else:
+                    chat_history.append("[error] not connected to server")
+            message = ""
+        elif key == 127 or key == 8:  # Backspace
+            message = message[:-1]
+        elif 32 <= key <= 126:  # Printable characters
+            message += chr(key)
 
     home_page(stdscr)
 
