@@ -19,6 +19,14 @@
         {
             "username": "Mr. Jugoon",
             "password": "i am so cool"
+        },
+        {
+            "username": "Random",
+            "password": "Password"
+        },
+        {
+            "username": "hi",
+            "password": "no"
         }
     ]
 }
